@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('/bank1.jpg');
+
+            background-color: #f0f0f0;
+        }
+
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            width: calc(33.33% - 20px);
+            margin: 10px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        .card-image {
+            width: 100%;
+            height: auto;
+            max-height: 150px; /* Adjust the maximum height as needed */
+        }
+
+        .card-content {
+            text-align: center;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .card p {
+            color: #666;
+        }
+        #withdraw-button {
+    border: none; /* Remove button border */
+    background-color: transparent; /* Remove grey background color */
+}
+
+#withdraw-button:hover {
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+    </style>
+</head>
+<body>
+    <marquee class="header" behavior="scroll" direction="left">Welcome to our online banking services</marquee>
+    <div class="container">
+        <h2 style="text-align: center;color: blue;text-decoration: underline;">Select a Service</h2>
+        <div class="card-container">           
+            <div class="card">
+                <form action="/open_account" method="get">
+                <button type="submit" class="card-content" id="withdraw-button">
+                    <img src="open.png" alt="open" class="card-image" id="withdraw-button">
+                    <p>Open account</p>
+                </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <form action="/add_money" method="get">
+                <button type="submit" class="card-content" id="withdraw-button">
+                    <img src="add.png" alt="add" class="card-image">
+                    <p>Add money</p>
+                </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <form action="/withdraw_money" method="get">
+                    <button type="submit" class="card-content" id="withdraw-button">
+                        <img src="withdraw.jpg" alt="withdraw" class="card-image">
+                        <p>Withdraw money</p>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <form action="/transfer_money" method="get">
+                <button type="submit" class="card-content" id="withdraw-button">
+                    <img src="transfer.jpeg" alt="transfer" class="card-image">
+                    <p>Money Transfer</p>
+                </button>
+                </form>
+            </div>
+            <div class="card">
+                <form action="/view_summary" method="get">
+                <button type="submit" class="card-content" id="withdraw-button">
+                    <img src="summary.png" alt="summary" class="card-image">
+                    <p>View summary of your account</p>
+                </button>
+                </form>
+            </div>
+            <div class="card" >
+                <form action="/book_meeting" method="get">
+                <button type="submit" class="card-content" id="withdraw-button">
+                    <img src="book.png" alt="book" class="card-image">
+                    <p>Schedule appointment with bank manager</p>
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
