@@ -11,6 +11,14 @@
             padding: 0;
             background-color: #f0f0f0;
             background: linear-gradient(to bottom, #f5f6f8, #98ceed);
+        }button{
+            background-color: #7198ea;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease-in-out;
         }
         .header {
             background-color: #007bff;
@@ -79,7 +87,11 @@
             </div>
             <div class="form-group">
                 <label for="validId">Enter amount</label>
-                <input type="number" id="amount" name="amount" required>
+                <input type="text" id="amount" name="amount" size="60" required>
+            </div>
+            <div class="form-group">
+                <label for="validId">Remarks: </label>
+                <input type="text" id="remarks" name="remarks" required>
             </div>
             <button type="submit" class="form-group">
                 Add Money
