@@ -255,6 +255,150 @@ app.post('/withdraw_money', (req, res) => {
 app.get('/transfer_money', (req, res) => {
     res.render('transfer_money.ejs',{msg:""});
 });
+// app.post('/transfer_money', (req, res) => {
+//     const acc_type = req.body.accountType;
+//     const e_id = req.body.employeeId;
+//     const name = req.body.username;
+//     const account_id = req.body.accountId;
+//     const rec_name = req.body.rec_name;
+//     const rec_id = req.body.rec_accountId;
+//     const amount = parseInt(req.body.amount); // Convert amount to a floating-point number
+//     const by = req.body.remarks;
+//     const sender = "Sending to " + rec_name;
+//     const rec = "Received from " + name;
+
+//     // Check if the employee ID is valid
+//     db.collection('logindb').findOne({ employee_id: e_id })
+//         .then((employee) => {
+//             if (!employee) {
+//                 return res.status(400).json({ error: "Invalid employee ID" });
+//             }
+
+//             // Check if sender exists in transaction collection
+//             db.collection('transaction').findOne({ account_id: account_id, customer_name: name })
+//                 .then((senderTransaction) => {
+//                     if (senderTransaction) {
+//                         // Update existing sender transaction document
+//                         const senderUpdateQuery = { account_id: account_id, customer_name: name };
+//                         const senderUpdate = { $push: { details: { by: sender, amount: -amount } }, $inc: { balance: -amount } };
+
+//                         db.collection('transaction').updateOne(senderUpdateQuery, senderUpdate)
+//                             .then(() => {
+//                                 // Check if receiver exists in transaction collection
+//                                 db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
+//                                     .then((receiverTransaction) => {
+//                                         if (receiverTransaction) {
+//                                             // Update existing receiver transaction document
+//                                             const receiverUpdateQuery = { account_id: rec_id, customer_name: rec_name };
+//                                             const receiverUpdate = { $push: { details: { by: rec, amount: amount } }, $inc: { balance: amount } };
+
+//                                             db.collection('transaction').updateOne(receiverUpdateQuery, receiverUpdate)
+//                                                 .then(() => {
+//                                                     return res.status(200).json({ message: "Money transferred successfully" });
+//                                                 })
+//                                                 .catch((error) => {
+//                                                     console.error("Error updating receiver transaction:", error);
+//                                                     return res.status(500).json({ error: "Internal server error" });
+//                                                 });
+//                                         } else {
+//                                             // Add new receiver transaction document
+//                                             const receiverTransaction = {
+//                                                 account_type: acc_type,
+//                                                 customer_name: rec_name,
+//                                                 account_id: rec_id,
+//                                                 details: [{ by: rec, amount: amount }],
+//                                                 balance: amount
+//                                             };
+
+//                                             db.collection('transaction').insertOne(receiverTransaction)
+//                                                 .then(() => {
+//                                                     return res.status(200).json({ message: "Money transferred successfully" });
+//                                                 })
+//                                                 .catch((error) => {
+//                                                     console.error("Error adding new receiver transaction:", error);
+//                                                     return res.status(500).json({ error: "Internal server error" });
+//                                                 });
+//                                         }
+//                                     })
+//                                     .catch((error) => {
+//                                         console.error("Error querying receiver transaction:", error);
+//                                         return res.status(500).json({ error: "Internal server error" });
+//                                     });
+//                             })
+//                             .catch((error) => {
+//                                 console.error("Error updating sender transaction:", error);
+//                                 return res.status(500).json({ error: "Internal server error" });
+//                             });
+//                     } else {
+//                         // Add new sender transaction document
+//                         const senderTransaction = {
+//                             account_type: acc_type,
+//                             customer_name: name,
+//                             account_id: account_id,
+//                             details: [{ by: sender, amount: -amount }],
+//                             balance: -amount
+//                         };
+
+//                         db.collection('transaction').insertOne(senderTransaction)
+//                             .then(() => {
+//                                 // Check if receiver exists in transaction collection
+//                                 db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
+//                                     .then((receiverTransaction) => {
+//                                         if (receiverTransaction) {
+//                                             // Update existing receiver transaction document
+//                                             const receiverUpdateQuery = { account_id: rec_id, customer_name: rec_name };
+//                                             const receiverUpdate = { $push: { details: { by: rec, amount: amount } }, $inc: { balance: amount } };
+
+//                                             db.collection('transaction').updateOne(receiverUpdateQuery, receiverUpdate)
+//                                                 .then(() => {
+//                                                     return res.status(200).json({ message: "Money transferred successfully" });
+//                                                 })
+//                                                 .catch((error) => {
+//                                                     console.error("Error updating receiver transaction:", error);
+//                                                     return res.status(500).json({ error: "Internal server error" });
+//                                                 });
+//                                         } else {
+//                                             // Add new receiver transaction document
+//                                             const receiverTransaction = {
+//                                                 account_type: acc_type,
+//                                                 customer_name: rec_name,
+//                                                 account_id: rec_id,
+//                                                 details: [{ by: rec, amount: amount }],
+//                                                 balance: amount
+//                                             };
+
+//                                             db.collection('transaction').insertOne(receiverTransaction)
+//                                                 .then(() => {
+//                                                     return res.status(200).json({ message: "Money transferred successfully" });
+//                                                 })
+//                                                 .catch((error) => {
+//                                                     console.error("Error adding new receiver transaction:", error);
+//                                                     return res.status(500).json({ error: "Internal server error" });
+//                                                 });
+//                                         }
+//                                     })
+//                                     .catch((error) => {
+//                                         console.error("Error querying receiver transaction:", error);
+//                                         return res.status(500).json({ error: "Internal server error" });
+//                                     });
+//                             })
+//                             .catch((error) => {
+//                                 console.error("Error adding new sender transaction:", error);
+//                                 return res.status(500).json({ error: "Internal server error" });
+//                             });
+//                     }
+//                 })
+//                 .catch((error) => {
+//                     console.error("Error querying sender transaction:", error);
+//                         return res.status(500).json({ error: "Internal server error" });
+//                 });
+//         })
+//         .catch((error) => {
+//             console.error("Error checking employee ID:", error);
+//             return res.status(500).json({ error: "Internal server error" });
+//         });
+// });
+
 app.post('/transfer_money', (req, res) => {
     const acc_type = req.body.accountType;
     const e_id = req.body.employeeId;
@@ -274,130 +418,107 @@ app.post('/transfer_money', (req, res) => {
                 return res.status(400).json({ error: "Invalid employee ID" });
             }
 
-            // Check if sender exists in transaction collection
+            // Check if sender exists in transaction collection and has sufficient balance
             db.collection('transaction').findOne({ account_id: account_id, customer_name: name })
                 .then((senderTransaction) => {
-                    if (senderTransaction) {
-                        // Update existing sender transaction document
-                        const senderUpdateQuery = { account_id: account_id, customer_name: name };
-                        const senderUpdate = { $push: { details: { by: sender, amount: -amount } }, $inc: { balance: -amount } };
-
-                        db.collection('transaction').updateOne(senderUpdateQuery, senderUpdate)
-                            .then(() => {
-                                // Check if receiver exists in transaction collection
-                                db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
-                                    .then((receiverTransaction) => {
-                                        if (receiverTransaction) {
-                                            // Update existing receiver transaction document
-                                            const receiverUpdateQuery = { account_id: rec_id, customer_name: rec_name };
-                                            const receiverUpdate = { $push: { details: { by: rec, amount: amount } }, $inc: { balance: amount } };
-
-                                            db.collection('transaction').updateOne(receiverUpdateQuery, receiverUpdate)
-                                                .then(() => {
-                                                    return res.status(200).json({ message: "Money transferred successfully" });
-                                                })
-                                                .catch((error) => {
-                                                    console.error("Error updating receiver transaction:", error);
-                                                    return res.status(500).json({ error: "Internal server error" });
-                                                });
-                                        } else {
-                                            // Add new receiver transaction document
-                                            const receiverTransaction = {
-                                                account_type: acc_type,
-                                                customer_name: rec_name,
-                                                account_id: rec_id,
-                                                details: [{ by: rec, amount: amount }],
-                                                balance: amount
-                                            };
-
-                                            db.collection('transaction').insertOne(receiverTransaction)
-                                                .then(() => {
-                                                    return res.status(200).json({ message: "Money transferred successfully" });
-                                                })
-                                                .catch((error) => {
-                                                    console.error("Error adding new receiver transaction:", error);
-                                                    return res.status(500).json({ error: "Internal server error" });
-                                                });
-                                        }
-                                    })
-                                    .catch((error) => {
-                                        console.error("Error querying receiver transaction:", error);
-                                        return res.status(500).json({ error: "Internal server error" });
-                                    });
-                            })
-                            .catch((error) => {
-                                console.error("Error updating sender transaction:", error);
-                                return res.status(500).json({ error: "Internal server error" });
-                            });
-                    } else {
-                        // Add new sender transaction document
-                        const senderTransaction = {
-                            account_type: acc_type,
-                            customer_name: name,
-                            account_id: account_id,
-                            details: [{ by: sender, amount: -amount }],
-                            balance: -amount
-                        };
-
-                        db.collection('transaction').insertOne(senderTransaction)
-                            .then(() => {
-                                // Check if receiver exists in transaction collection
-                                db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
-                                    .then((receiverTransaction) => {
-                                        if (receiverTransaction) {
-                                            // Update existing receiver transaction document
-                                            const receiverUpdateQuery = { account_id: rec_id, customer_name: rec_name };
-                                            const receiverUpdate = { $push: { details: { by: rec, amount: amount } }, $inc: { balance: amount } };
-
-                                            db.collection('transaction').updateOne(receiverUpdateQuery, receiverUpdate)
-                                                .then(() => {
-                                                    return res.status(200).json({ message: "Money transferred successfully" });
-                                                })
-                                                .catch((error) => {
-                                                    console.error("Error updating receiver transaction:", error);
-                                                    return res.status(500).json({ error: "Internal server error" });
-                                                });
-                                        } else {
-                                            // Add new receiver transaction document
-                                            const receiverTransaction = {
-                                                account_type: acc_type,
-                                                customer_name: rec_name,
-                                                account_id: rec_id,
-                                                details: [{ by: rec, amount: amount }],
-                                                balance: amount
-                                            };
-
-                                            db.collection('transaction').insertOne(receiverTransaction)
-                                                .then(() => {
-                                                    return res.status(200).json({ message: "Money transferred successfully" });
-                                                })
-                                                .catch((error) => {
-                                                    console.error("Error adding new receiver transaction:", error);
-                                                    return res.status(500).json({ error: "Internal server error" });
-                                                });
-                                        }
-                                    })
-                                    .catch((error) => {
-                                        console.error("Error querying receiver transaction:", error);
-                                        return res.status(500).json({ error: "Internal server error" });
-                                    });
-                            })
-                            .catch((error) => {
-                                console.error("Error adding new sender transaction:", error);
-                                return res.status(500).json({ error: "Internal server error" });
-                            });
+                    if (!senderTransaction || senderTransaction.balance < amount) {
+                        return res.status(400).json({ error: "Insufficient balance in the sender's account" });
                     }
+
+                    // Update existing sender transaction document
+                    const senderUpdateQuery = { account_id: account_id, customer_name: name };
+                    const senderUpdate = { $push: { details: { by: sender, amount: -amount } }, $inc: { balance: -amount } };
+
+                    db.collection('transaction').updateOne(senderUpdateQuery, senderUpdate)
+                        .then(() => {
+                            // Check if receiver exists in customer collection, if not add as new customer
+                            db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
+                                .then((receiverCustomer) => {
+                                    if (!receiverCustomer) {
+                                        // Add new receiver customer
+                                        const receiverCustomer = {
+                                            customer_name: rec_name,
+                                            account_id: rec_id
+                                        };
+
+                                        db.collection('transaction').insertOne(receiverCustomer)
+                                            .then(() => {
+                                                // Proceed with the transfer
+                                                updateReceiverTransaction();
+                                            })
+                                            .catch((error) => {
+                                                console.error("Error adding new receiver customer:", error);
+                                                return res.status(500).json({ error: "Internal server error" });
+                                            });
+                                    } else {
+                                        // Proceed with the transfer
+                                        updateReceiverTransaction();
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error querying receiver customer:", error);
+                                    return res.status(500).json({ error: "Internal server error" });
+                                });
+                        })
+                        .catch((error) => {
+                            console.error("Error updating sender transaction:", error);
+                            return res.status(500).json({ error: "Internal server error" });
+                        });
                 })
                 .catch((error) => {
                     console.error("Error querying sender transaction:", error);
-                        return res.status(500).json({ error: "Internal server error" });
+                    return res.status(500).json({ error: "Internal server error" });
                 });
+
+            function updateReceiverTransaction() {
+                // Check if receiver exists in transaction collection
+                db.collection('transaction').findOne({ account_id: rec_id, customer_name: rec_name })
+                    .then((receiverTransaction) => {
+                        if (receiverTransaction) {
+                            // Update existing receiver transaction document
+                            const receiverUpdateQuery = { account_id: rec_id, customer_name: rec_name };
+                            const receiverUpdate = { $push: { details: { by: rec, amount: amount } }, $inc: { balance: amount } };
+
+                            db.collection('transaction').updateOne(receiverUpdateQuery, receiverUpdate)
+                                .then(() => {
+                                    return res.status(200).json({ message: "Money transferred successfully" });
+                                })
+                                .catch((error) => {
+                                    console.error("Error updating receiver transaction:", error);
+                                    return res.status(500).json({ error: "Internal server error" });
+                                });
+                        } else {
+                            // Add new receiver transaction document
+                            const receiverTransaction = {
+                                account_type: acc_type,
+                                customer_name: rec_name,
+                                account_id: rec_id,
+                                details: [{ by: rec, amount: amount }],
+                                balance: amount
+                            };
+
+                            db.collection('transaction').insertOne(receiverTransaction)
+                                .then(() => {
+                                    return res.status(200).json({ message: "Money transferred successfully" });
+                                })
+                                .catch((error) => {
+                                    console.error("Error adding new receiver transaction:", error);
+                                    return res.status(500).json({ error: "Internal server error" });
+                                });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error querying receiver transaction:", error);
+                        return res.status(500).json({ error: "Internal server error" });
+                    });
+            }
         })
         .catch((error) => {
             console.error("Error checking employee ID:", error);
             return res.status(500).json({ error: "Internal server error" });
         });
 });
+
 
 
 
