@@ -9,9 +9,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-image: url('/bank1.jpg');
+            background: linear-gradient(to bottom, #f5f6f8, #98ceed);
 
-            background-color: #f0f0f0;
         }
         button{
             background-color: #7198ea;
@@ -92,7 +91,7 @@
 <body>
     <marquee class="header" behavior="scroll" direction="left">Welcome to our online banking services</marquee>
     <div class="container">
-        <h2 style="text-align: center;color: blue;text-decoration: underline;">Select a Service</h2>
+        <h2 style="text-align: center;color: rgb(24, 4, 125);text-decoration: underline;">Services</h2>
         <div class="card-container">           
             <div class="card">
                 <form action="/open_account" method="get">
@@ -107,7 +106,7 @@
                 <form action="/add_money" method="get">
                 <button type="submit" class="card-content" id="withdraw-button">
                     <img src="add.png" alt="add" class="card-image">
-                    <p>Add money</p>
+                    <p>Deposit money</p>
                 </button>
                 </form>
             </div>
@@ -138,10 +137,10 @@
                 </form>
             </div>
             <div class="card" >
-                <form action="/book_meeting" method="get">
+                <form action="/delete_accn" method="get">
                 <button type="submit" class="card-content" id="withdraw-button">
-                    <img src="book.png" alt="book" class="card-image">
-                    <p>Schedule appointment with bank manager</p>
+                    <img src="Account-closed.jpg" alt="book" class="card-image">
+                    <p>Terminate your account</p>
                 </button>
                 </form>
             </div>
