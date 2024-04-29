@@ -557,31 +557,35 @@ app.post("/view_summary", (req, res) => {
         console.error("Error fetching transactions:", error);
         return res.status(500).json({ error: "Internal server error" });
       });
-  } else if (filter === "5d") {
-    // Show top 5 debit transactions
-    db.collection("transaction")
-      .aggregate([
-        {
-          $match: {
-            customer_name: name,
-            account_id: acc_id,
-            "details.amount": { $lt: 0 },
+  } // Create indexes for customer_name, account_id, and details.amount
+  
+  // Now execute the query with the indexes applied
+  else if (filter === "5d") {
+    db.collection("transaction").createIndex({ customer_name: 1, account_id: 1, "details.amount": 1 });
+      // Show top 5 debit transactions
+      db.collection("transaction")
+        .aggregate([
+          {
+            $match: {
+              customer_name: name,
+              account_id: acc_id,
+              "details.amount": { $lt: 0 },
+            },
           },
-        },
-        { $unwind: "$details" },
-        { $match: { "details.amount": { $lt: 0 } } },
-        { $sort: { "details.amount": 1 } },
-        { $limit: 5 },
-      ])
-      .toArray()
-      .then((transactions) => {
-        return res.status(200).json({ history: transactions });
-      })
-      .catch((error) => {
-        console.error("Error fetching top 5 debit transactions:", error);
-        return res.status(500).json({ error: "Internal server error" });
-      });
-  } else {
+          { $unwind: "$details" },
+          { $match: { "details.amount": { $lt: 0 } } },
+          { $sort: { "details.amount": 1 } },
+          { $limit: 5 },
+        ])
+        .toArray()
+        .then((transactions) => {
+          return res.status(200).json({ history: transactions });
+        })
+        .catch((error) => {
+          console.error("Error fetching top 5 debit transactions:", error);
+          return res.status(500).json({ error: "Internal server error" });
+        });
+    }else {
     return res.status(400).json({ error: "Invalid filter type" });
   }
 });
