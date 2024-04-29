@@ -71,15 +71,15 @@
         <form action="/view_summary" method="post">
             <div class="form-group">
                 <label for="employeeId">Bank Employee ID</label>
-                <input type="text" id="employeeId" name="employeeId" required>
+                <input type="text" id="employeeId" name="employeeId" size="60" required>
             </div>
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" size="60" required>
             </div>
             <div class="form-group">
                 <label for="accountId">Account ID</label>
-                <input type="text" id="accountId" name="accountId" required>
+                <input type="text" id="accountId" name="accountId" size="60" required>
             </div>
             <div class="form-group">
                 <label for="filterType">Filter by:</label>
@@ -87,9 +87,10 @@
                     <option value="credit">Credit History</option>
                     <option value="debit">Debit History</option>
                     <option value="meeting">Meeting History</option>
+                    <option value="up_meeting">Upcoming Meeting</option>
                     <option value="5t">Top 5 transactions</option>
-                    <option value="meeting">Top 5 Credit transactions</option>
-                    <option value="meeting">Top 5 Debit transactions</option>
+                    <option value="5c">Top 5 Credit transactions</option>
+                    <option value="5d">Top 5 Debit transactions</option>
                 </select>
             </div>
             <div class="form-group">
