@@ -586,96 +586,58 @@ app.post("/view_summary", (req, res) => {
   }
 });
 
-app.get("/book_meeting", (req, res) => {
-  res.render("book_meeting.ejs", { msg: "" });
+app.get("/delete_accn", (req, res) => {
+  res.render("delete_accn.ejs", { msg: "" });
 });
-app.post("/book_meeting", (req, res) => {
-  const e_id = req.body.employeeId;
+app.post("/delete_accn", (req, res) => {
+  const employee_id = req.body.employeeId;
   const name = req.body.username;
   const acc_id = req.body.accountId;
-  const date = new Date(req.body.appointment_date); // Parse the appointment date
-  const reason = req.body.reason;
+  const govt_id = req.body.govtId;
 
-  // Check if the appointment date is after the current date
-  const currentDate = new Date();
-  if (date <= currentDate) {
-    return res
-      .status(400)
-      .json({ error: "Appointment date must be after the current date" });
-  }
-
-  // Check if the employee ID exists in the logindb collection
-  db.collection("logindb")
-    .findOne({ employee_id: e_id })
-    .then((employee) => {
-      if (!employee) {
-        return res.status(404).json({ error: "Employee ID not found" });
-      }
-
-      // Check if the employee's name and account ID exist in the customer collection
-      db.collection("customer")
-        .findOne({
-          customer_name: name,
-          account_id: acc_id,
-        })
-        .then((customer) => {
-          if (!customer) {
-            return res
-              .status(404)
-              .json({ error: "Customer details not found" });
+  // Check if the employee ID is valid
+  db.collection('logindb').findOne({ employee_id: employee_id })
+      .then((employee) => {
+          if (!employee) {
+              return res.status(400).json({ error: "Invalid employee ID" });
           }
 
-          // Check if the manager has less than 5 meetings booked on the given date
-          db.collection("meetings")
-            .countDocuments({
-              employee_id: e_id,
-              appointment_date: date,
-            })
-            .then((count) => {
-              if (count >= 5) {
-                return res.status(400).json({
-                  error:
-                    "Manager has reached the maximum number of meetings for this date",
-                });
-              }
+          // Check if the balance for the given account is zero
+          db.collection('transaction').findOne({ account_id: acc_id, customer_name: name })
+              .then((transaction) => {
+                  if (!transaction || transaction.balance !== 0) {
+                      return res.status(400).json({ error: "Balance is not zero or account not found" });
+                  }
 
-              // Book the meeting if all conditions are met
-              // Insert transaction into the 'meetings' collection
-              const transaction = {
-                employee_id: e_id,
-                appointment_date: date,
-                reason: reason,
-                customer_name: name,
-                customer_id: customer._id, // Assuming you have a customer ID field in the 'customer' collection
-                // Add other meeting details here
-              };
-
-              db.collection("meetings")
-                .insertOne(transaction)
-                .then(() => {
-                  return res
-                    .status(200)
-                    .json({ message: "Meeting booked successfully" });
-                })
-                .catch((error) => {
-                  console.error("Error adding meeting:", error);
-                  return res
-                    .status(500)
-                    .json({ error: "Internal server error" });
-                });
-            })
-            .catch((error) => {
-              console.error("Error checking meeting count:", error);
-              return res.status(500).json({ error: "Internal server error" });
-            });
-        })
-        .catch((error) => {
-          console.error("Error checking customer details:", error);
+                  // Delete document from customer collection
+                  db.collection('customer').deleteOne({ account_id: acc_id, customer_name: name, govt_id: govt_id })
+                      .then((result) => {
+                          if (result.deletedCount === 0) {
+                              return res.status(400).json({ error: "Customer not found" });
+                          }
+                          // Delete documents from transaction collection
+                          db.collection('transaction').deleteMany({ account_id: acc_id, customer_name: name })
+                              .then(() => {
+                                  return res.status(200).json({ message: "Termination Under Verification. Will be notified shortly." });
+                              })
+                              .catch((error) => {
+                                  console.error("Error deleting transactions:", error);
+                                  return res.status(500).json({ error: "Internal server error" });
+                              });
+                      })
+                      .catch((error) => {
+                          console.error("Error deleting customer:", error);
+                          return res.status(500).json({ error: "Internal server error" });
+                      });
+              })
+              .catch((error) => {
+                  console.error("Error checking balance:", error);
+                  return res.status(500).json({ error: "Internal server error" });
+              });
+      })
+      .catch((error) => {
+          console.error("Error checking employee ID:", error);
           return res.status(500).json({ error: "Internal server error" });
-        });
-    })
-    .catch((error) => {
-      console.error("Error checking employee ID:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    });
+      });
 });
+
