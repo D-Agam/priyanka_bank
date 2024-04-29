@@ -138,76 +138,82 @@ app.post("/add_money", (req, res) => {
   const name = req.body.username;
   const accountId = req.body.accountId;
   const amount = parseInt(req.body.amount);
-  const transactionDate = new Date().toISOString(); // Current date and time
+  const transactionDate = new Date().toISOString(); 
   const by = req.body.remarks;
+  if (amount < 0) {
+    res.send("Enter valid amount");
+  } else {
+    db.collection("logindb")
+      .findOne({ employee_id: employeeId })
+      .then((user) => {
+        if (!user) {
+          console.log("Please verify your details!");
+          return res
+            .status(404)
+            .render("add_money.ejs", { msg: "Please verify your details" });
+        }
 
-  db.collection("logindb")
-    .findOne({ employee_id: employeeId })
-    .then((user) => {
-      if (!user) {
-        console.log("Please verify your details!");
-        return res
-          .status(404)
-          .render("add_money.ejs", { msg: "Please verify your details" });
-      }
-
-      // Check if the customer already has a transaction record
-      db.collection("transaction")
-        .findOne({
-          customer_name: name,
-          account_id: accountId,
-        })
-        .then((existingTransaction) => {
-          if (existingTransaction) {
-            db.collection("transaction")
-              .updateOne(
-                {
+        db.collection("transaction")
+          .findOne({
+            customer_name: name,
+            account_id: accountId,
+          })
+          .then((existingTransaction) => {
+            if (existingTransaction) {
+              db.collection("transaction")
+                .updateOne(
+                  {
+                    customer_name: name,
+                    account_id: accountId,
+                  },
+                  {
+                    $push: {
+                      details: {
+                        by: by,
+                        amount: amount,
+                        date: transactionDate,
+                      },
+                    },
+                    $inc: { balance: amount },
+                  }
+                )
+                .then(() => {
+                  console.log("Transaction details updated successfully");
+                  res.send("Money added successfully");
+                })
+                .catch((error) => {
+                  console.error("Error updating transaction details:", error);
+                  res.status(500).json({ error: "Internal server error." });
+                });
+            } else {
+              db.collection("transaction")
+                .insertOne({
+                  account_type: accountType,
                   customer_name: name,
                   account_id: accountId,
-                },
-                {
-                  $push: {
-                    details: { by: by, amount: amount, date: transactionDate },
-                  },
-                  $inc: { balance: amount },
-                }
-              )
-              .then(() => {
-                console.log("Transaction details updated successfully");
-                res.send("Money added successfully");
-              })
-              .catch((error) => {
-                console.error("Error updating transaction details:", error);
-                res.status(500).json({ error: "Internal server error." });
-              });
-          } else {
-            db.collection("transaction")
-              .insertOne({
-                account_type: accountType,
-                customer_name: name,
-                account_id: accountId,
-                details: [{ by: by, amount: amount, date: transactionDate }],
-                balance: amount,
-              })
-              .then(() => {
-                console.log("New transaction added successfully");
-                res.send("Money added successfully");
-              })
-              .catch((error) => {
-                console.error("Error adding new transaction:", error);
-                res.status(500).json({ error: "Internal server error." });
-              });
-          }
-        })
-        .catch((error) => {
-          console.error("Error querying transaction collection:", error);
-          res.status(500).json({ error: "Internal server error." });
-        });
-    })
-    .catch((error) => {
-      console.error("Error querying logindb collection:", error);
-      res.status(500).json({ error: "Internal server error." });
-    });
+                  details: [{ by: by, amount: amount, date: transactionDate }],
+                  balance: amount,
+                })
+                .then(() => {
+                  console.log("New transaction added successfully");
+                  res.send("Money added successfully");
+                })
+                .catch((error) => {
+                  console.error("Error adding new transaction:", error);
+                  res.status(500).json({ error: "Internal server error." });
+                });
+            }
+          })
+          .catch((error) => {
+            console.error("Error querying transaction collection:", error);
+            res.status(500).json({ error: "Internal server error." });
+          });
+      })
+      .catch((error) => {
+        console.error("Error querying logindb collection:", error);
+        res.status(500).json({ error: "Internal server error." });
+      });
+  }
 });
 
 app.get("/withdraw_money", (req, res) => {
@@ -219,66 +225,71 @@ app.post("/withdraw_money", (req, res) => {
   const name = req.body.username;
   const accountId = req.body.accountId;
   const amount = -1 * parseInt(req.body.amount);
-  const transactionDate = new Date().toISOString(); // Current date and time
+  const transactionDate = new Date().toISOString(); 
   const by = req.body.remarks;
   console.log(amount);
   if (amount > 0) {
     res.send("Wrong details entered");
-  }
-  db.collection("logindb")
-    .findOne({ employee_id: employeeId })
-    .then((user) => {
-      if (!user) {
-        console.log("Please verify your details!");
-        return res
-          .status(404)
-          .render("withdraw_money.ejs", { msg: "Please verify your details" });
-      }
+  } else {
+    db.collection("logindb")
+      .findOne({ employee_id: employeeId })
+      .then((user) => {
+        if (!user) {
+          console.log("Please verify your details!");
+          return res.status(404).render("withdraw_money.ejs", {
+            msg: "Please verify your details",
+          });
+        }
 
-      db.collection("transaction")
-        .findOne({
-          account_type: accountType,
-          customer_name: name,
-          account_id: accountId,
-          balance: { $gte: -amount },
-        })
-        .then((existingTransaction) => {
-          if (existingTransaction) {
-            db.collection("transaction")
-              .updateOne(
-                {
-                  customer_name: name,
-                  account_id: accountId,
-                },
-                {
-                  $push: {
-                    details: { by: by, amount: amount, date: transactionDate },
+        db.collection("transaction")
+          .findOne({
+            account_type: accountType,
+            customer_name: name,
+            account_id: accountId,
+            balance: { $gte: -amount },
+          })
+          .then((existingTransaction) => {
+            if (existingTransaction) {
+              db.collection("transaction")
+                .updateOne(
+                  {
+                    customer_name: name,
+                    account_id: accountId,
                   },
-                  $inc: { balance: amount },
-                }
-              )
-              .then(() => {
-                console.log("Transaction details updated successfully");
-                res.send("Money withdrawn successfully");
-              })
-              .catch((error) => {
-                console.error("Error updating transaction details:", error);
-                res.status(500).json({ error: "Internal server error." });
-              });
-          } else {
-            console.log("Insufficient balance");
-            res.status(400).send("Insufficient balance for withdrawal");
-          }
-        })
-        .catch((error) => {
-          console.error("Error querying transaction collection:", error);
-          res.status(500).json({ error: "Internal server error." });
-        });
-    })
-    .catch((error) => {
-      console.error("Error querying logindb collection:", error);
-      res.status(500).json({ error: "Internal server error." });
-    });
+                  {
+                    $push: {
+                      details: {
+                        by: by,
+                        amount: amount,
+                        date: transactionDate,
+                      },
+                    },
+                    $inc: { balance: amount },
+                  }
+                )
+                .then(() => {
+                  console.log("Transaction details updated successfully");
+                  res.send("Money withdrawn successfully");
+                })
+                .catch((error) => {
+                  console.error("Error updating transaction details:", error);
+                  res.status(500).json({ error: "Internal server error." });
+                });
+            } else {
+              console.log("Insufficient balance");
+              res.status(400).send("Insufficient balance for withdrawal");
+            }
+          })
+          .catch((error) => {
+            console.error("Error querying transaction collection:", error);
+            res.status(500).json({ error: "Internal server error." });
+          });
+      })
+      .catch((error) => {
+        console.error("Error querying logindb collection:", error);
+        res.status(500).json({ error: "Internal server error." });
+      });
+  }
 });
 
 app.get("/transfer_money", (req, res) => {
@@ -295,7 +306,7 @@ app.post("/transfer_money", (req, res) => {
   const by = req.body.remarks;
   const sender = "Sending to " + rec_name;
   const rec = "Received from " + name;
-  const date=new Date().toISOString();
+  const date = new Date().toISOString();
   // Check if the employee ID is valid
   db.collection("logindb")
     .findOne({ employee_id: e_id })
@@ -320,7 +331,7 @@ app.post("/transfer_money", (req, res) => {
             customer_name: name,
           };
           const senderUpdate = {
-            $push: { details: { by: sender, amount: -amount,date:date } },
+            $push: { details: { by: sender, amount: -amount, date: date } },
             $inc: { balance: -amount },
           };
 
@@ -387,7 +398,7 @@ app.post("/transfer_money", (req, res) => {
                 customer_name: rec_name,
               };
               const receiverUpdate = {
-                $push: { details: { by: rec, amount: amount,date:date } },
+                $push: { details: { by: rec, amount: amount, date: date } },
                 $inc: { balance: amount },
               };
 
@@ -410,7 +421,7 @@ app.post("/transfer_money", (req, res) => {
                 account_type: acc_type,
                 customer_name: rec_name,
                 account_id: rec_id,
-                details: [{ by: rec, amount: amount,date:date }],
+                details: [{ by: rec, amount: amount, date: date }],
                 balance: amount,
               };
 
@@ -448,19 +459,10 @@ app.get("/view_summary", (req, res) => {
   res.render("view_summary.ejs");
 });
 app.post("/view_summary", (req, res) => {
-    const filter = req.body.filterType;
-    const timestamp = req.body.timeFilter;
-    const e_id = req.body.employeeId;
-    const name = req.body.username;
-    const acc_id = req.body.accountId;
-
-    var currentDate = new Date(); // Get the current date
-    console.log(currentDate);
-    var cutoffDate = new Date(currentDate - timestamp * 24 * 60 * 60 * 1000);
-    console.log(cutoffDate);
-// Convert dates to ISO strings for MongoDB comparison
-        currentDate = currentDate.toISOString();
-        cutoffDate = cutoffDate.toISOString();
+  const filter = req.body.filterType;
+  const e_id = req.body.employeeId;
+  const name = req.body.username;
+  const acc_id = req.body.accountId;
 
   if (filter === "credit") {
     db.collection("transaction")
@@ -470,12 +472,10 @@ app.post("/view_summary", (req, res) => {
             customer_name: name,
             account_id: acc_id,
             "details.amount": { $gt: 0 },
-            "details.date": { $gt: cutoffDate },
           },
         },
         { $unwind: "$details" },
         { $match: { "details.amount": { $gt: 0 } } }, // Filter for positive amounts
-        { $sort: { "details.date": -1 } },
       ])
       .toArray()
       .then((credit_hist) => {
@@ -493,12 +493,10 @@ app.post("/view_summary", (req, res) => {
             customer_name: name,
             account_id: acc_id,
             "details.amount": { $lt: 0 },
-            "details.date": { $gt: cutoffDate },
           },
         },
         { $unwind: "$details" },
         { $match: { "details.amount": { $lt: 0 } } }, // Filter for negative amounts
-        { $sort: { "details.date": -1 } },
       ])
       .toArray()
       .then((debit_hist) => {
@@ -506,36 +504,6 @@ app.post("/view_summary", (req, res) => {
       })
       .catch((error) => {
         console.error("Error fetching debit history:", error);
-        return res.status(500).json({ error: "Internal server error" });
-      });
-  } else if (filter === "meeting") {
-    db.collection("meetings")
-      .find({
-        customer_name: name,
-        customer_id: acc_id,
-        appointment_date: { $gte: cutoffDate },
-      })
-      .toArray()
-      .then((meeting_hist) => {
-        return res.status(200).json({ history: meeting_hist });
-      })
-      .catch((error) => {
-        console.error("Error fetching meeting history:", error);
-        return res.status(500).json({ error: "Internal server error" });
-      });
-  } else if (filter === "up_meeting") {
-    db.collection("meetings")
-      .find({
-        customer_name: name,
-        customer_id: acc_id,
-        appointment_date: { $gt: currentDate }, // Filter for dates greater than the current date
-      })
-      .toArray()
-      .then((meeting_hist) => {
-        return res.status(200).json({ history: meeting_hist });
-      })
-      .catch((error) => {
-        console.error("Error fetching upcoming meeting history:", error);
         return res.status(500).json({ error: "Internal server error" });
       });
   } else if (filter === "5t") {
@@ -546,11 +514,15 @@ app.post("/view_summary", (req, res) => {
           $match: {
             customer_name: name,
             account_id: acc_id,
-            "details.date": { $gt: cutoffDate },
           },
         },
         { $unwind: "$details" },
-        { $sort: { "details.amount": -1 } },
+        {
+          $addFields: {
+            abs_amount: { $abs: "$details.amount" }, // Add a new field with the absolute value of details.amount
+          },
+        },
+        { $sort: { abs_amount: -1 } }, // Sort by the absolute value of details.amount
         { $limit: 5 },
       ])
       .toArray()
@@ -570,7 +542,6 @@ app.post("/view_summary", (req, res) => {
             customer_name: name,
             account_id: acc_id,
             "details.amount": { $gt: 0 }, // Filter by nested amount field
-            "details.date": { $gt: cutoffDate },
           },
         },
         { $unwind: "$details" },
@@ -595,7 +566,6 @@ app.post("/view_summary", (req, res) => {
             customer_name: name,
             account_id: acc_id,
             "details.amount": { $lt: 0 },
-            "details.date": { $gt: cutoffDate },
           },
         },
         { $unwind: "$details" },
